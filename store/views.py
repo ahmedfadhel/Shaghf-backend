@@ -1,27 +1,36 @@
+from random import sample
+
 from django.db.models.aggregates import Count
-from random import randint
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
-from .models import OptionValue, Product, Tag,Category
-from .serializers import OptionValueSerializer, ProductSerializer, TagSerializer,CategorySerializer
+from .models import Category, OptionValue, Product, Tag
+from .serializers import (CategorySerializer, OptionValueSerializer,
+                          ProductSerializer, TagSerializer)
 
-
+class CustomPagination(PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'page':self.page.number,
+            'page_size':self.page_size,
+            'count': self.page.paginator.count,
+            'results': data
+        })
 @api_view(['GET'])
 def products_list(request):
-    try:
-        products = OptionValue.objects.filter(is_main=True)
-        # products = OptionValue.objects.all()
-        serializer = OptionValueSerializer(products,many=True,context={'request': request})
-        
-        return Response(serializer.data,status=status.HTTP_200_OK)
-    except:
-        return Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
+    products = OptionValue.objects.filter(is_main=True)
+    paginator = CustomPagination()
+    paginator.page_size = 8
+    result_page = paginator.paginate_queryset(products,request)
+    serializer = OptionValueSerializer(result_page,many=True,context={'request': request})
+    return  paginator.get_paginated_response(serializer.data)
 @api_view(['GET'])
 def featured_product(request):
     try:
-        # featured_product = Product.objects.filter(is_featured = True)
         featured_product = OptionValue.objects.filter(product__is_featured=True,is_main=True)
         serializer = OptionValueSerializer(featured_product,many=True,context={'request': request})
         return Response(serializer.data,status = status.HTTP_200_OK)
@@ -32,22 +41,22 @@ def featured_product(request):
 def product_retrieve(request,slug):
     try:
         product = Product.objects.get(slug=slug)
-        if(product.product_options.all()[0].option.name == 'qu'):
-            related_products = OptionValue.objects.filter(option__name = 'ge',is_main=True).exclude(prodcut__slug =slug)
-        else:
-            related_products = OptionValue.objects.filter(option__name = product.product_options.all()[0].option.name,is_main=True).exclude(product__slug = slug)
-        if(related_products.count() == 1):
-            related_products = OptionValue.objects.filter(option__name = product.product_options.all()[0].option.name,is_main=True).exclude(product__slug = slug)
-
-            x = 1
-        else:
-
-            x = randint(0,related_products.count()-3)
-        related_products_serializer = OptionValueSerializer(related_products[x:x+3],context={'request':request},many=True)    
         serializer = ProductSerializer(product,context={'request': request})
+        if(product.product_options.all()[0].option.name == 'qu'):
+           
+            related_products = OptionValue.objects.filter(option__name = 'ge',is_main=True)
+        else:
+            related_products = OptionValue.objects.filter(option__name = product.product_options.all()[0].option.name,is_main=True).exclude(product__slug = slug)
+        
+        related_products = list(related_products)
+        if(len(related_products) >= 3):
+            related_products = sample(related_products,3)
+        
+        related_products_serializer = OptionValueSerializer(related_products,context={'request':request},many=True)    
         return Response({
             'product':serializer.data,
             'related_products':related_products_serializer.data
+
         },status=status.HTTP_200_OK)
     except:
         return Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
@@ -64,8 +73,15 @@ def category_list(request):
 @api_view(['GET'])
 def category_retrieve(request,slug):
     products = OptionValue.objects.filter(product__category__slug = slug , is_main=True)
-    serializer = OptionValueSerializer(products,context={"request":request},many=True)
-    return Response(serializer.data,status=status.HTTP_200_OK)
+    if(len(products) < 1):
+        return Response('Not Found',status=status.HTTP_404_NOT_FOUND)
+    paginator = CustomPagination()
+    paginator.page_size = 12
+    result_page = paginator.paginate_queryset(products,request)
+    serializer = OptionValueSerializer(result_page,context={"request":request},many=True)
+    # return Response(serializer.data,status=status.HTTP_200_OK)
+    return  paginator.get_paginated_response(serializer.data)
+
    
         
 

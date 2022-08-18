@@ -137,7 +137,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Rest Framework configuration
 REST_FRAMEWORK = {
     'DATE_FORMAT': "%Y-%m-%d",
-    
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',    
 }
 
 
