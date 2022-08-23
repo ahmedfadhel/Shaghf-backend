@@ -1,4 +1,5 @@
 from random import sample
+from django.db.models import Q
 
 from django.db.models.aggregates import Count
 from rest_framework import status
@@ -49,8 +50,8 @@ def product_retrieve(request,slug):
             related_products = OptionValue.objects.filter(option__name = product.product_options.all()[0].option.name,is_main=True).exclude(product__slug = slug)
         
         related_products = list(related_products)
-        if(len(related_products) >= 3):
-            related_products = sample(related_products,3)
+        if(len(related_products) >= 4):
+            related_products = sample(related_products,4)
         
         related_products_serializer = OptionValueSerializer(related_products,context={'request':request},many=True)    
         return Response({
@@ -91,3 +92,12 @@ def tags_list(request):
         tags = Tag.objects.all()
         serializer = TagSerializer(tags,many=True)
         return Response(serializer.data,status.HTTP_200_OK)
+
+@api_view(['GET'])
+def search(request,q):
+    print(q)
+    search_products = OptionValue.objects.filter( Q(name__icontains = q) | Q(product__name__icontains=q))
+    search_products = search_products.filter(is_main=True)
+    print(search_products)
+    serializer = OptionValueSerializer(search_products,many=True,context={"request":request})
+    return Response(serializer.data,status=status.HTTP_200_OK)
