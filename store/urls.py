@@ -13,7 +13,7 @@ urlpatterns =[
     path('products',products_list,name="Products List"),
     # path('products/<slug:slug>',product_retrieve, name="Product Retrieve")
     re_path(r'^products/(?P<slug>[\u0600-\u06FF-a-zA-Z0-9]+)$',product_retrieve,name="Product Retreive"),
-    re_path(r'^search/(?P<q>[\u0600-\u06FF-a-zA-Z0-9]+)$',search,name="Products Search"),
+    re_path(r'^search/(?P<q>[\u0600-\u06FF-a-zA-Z0-9-\s]+)$',search,name="Products Search"),
 ]
 
     # re_path(r'^store/(?P<slug>[\u0600-\u06FF-a-zA-Z0-9]+)$', ProductRetrieveView.as_view(),name="store-product-retrieve"),

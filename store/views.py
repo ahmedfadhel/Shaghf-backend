@@ -1,3 +1,4 @@
+import queue
 from random import sample
 from django.db.models import Q
 
@@ -95,9 +96,16 @@ def tags_list(request):
 
 @api_view(['GET'])
 def search(request,q):
-    print(q)
-    search_products = OptionValue.objects.filter( Q(name__icontains = q) | Q(product__name__icontains=q))
-    search_products = search_products.filter(is_main=True)
-    print(search_products)
+    query = q.split(' ',1)
+    if(len(query)>1):
+        lookup = query[1]
+    else:
+        lookup=query[0]
+    search_products = OptionValue.objects.filter( Q(name__icontains= lookup) | Q(product__name__icontains= lookup))
+    
+    if( len(search_products) > 0 ):
+        if( search_products[0].option.name == 'qu' ):
+            search_products = search_products.filter(is_main = True)
+
     serializer = OptionValueSerializer(search_products,many=True,context={"request":request})
     return Response(serializer.data,status=status.HTTP_200_OK)
