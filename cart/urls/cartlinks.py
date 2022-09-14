@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (checkout, list_orders, order_status, retreive_order)
+from cart.views import (checkout, list_orders, order_status, retreive_order)
 urlpatterns =[
      path('orders',list_orders,name="List orders"),
      path('orders/retreive-order/<int:code>',retreive_order,name="Retreive order "),

@@ -112,3 +112,13 @@ def checkout(request):
        'status':201
         },status=status.HTTP_201_CREATED)
 
+
+@api_view(['POST'])
+def follow_order(request):
+    phone = request.data.get('phone',None)
+    if(phone):
+        orders = Order.objects.filter(shipping__phone = phone).order_by('-updated_at')
+        serializer = OrderSerializer(orders,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    else:
+        return Response('يرجى ملئ رقم الهاتف',status=status.HTTP_400_BAD_REQUEST)

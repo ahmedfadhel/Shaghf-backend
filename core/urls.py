@@ -17,12 +17,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-
+from cart.urls import (cartlinks as cart_urls,followlinks as follow_links)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/dashboard/',include('dashboard.urls')),
     path('api/store/',include('store.urls')),
-    path('api/dashboard/',include('cart.urls'))
+    path('api/dashboard/',include(cart_urls)),
+    path('api/orders/',include(follow_links))
+    
 ]
 
 if settings.DEBUG:
