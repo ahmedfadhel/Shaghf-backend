@@ -23,7 +23,8 @@ urlpatterns = [
     path('api/dashboard/',include('dashboard.urls')),
     path('api/store/',include('store.urls')),
     path('api/dashboard/',include(cart_urls)),
-    path('api/orders/',include(follow_links))
+    path('api/orders/',include(follow_links)),
+    path('api/discount/',include('discount.urls'))
     
 ]
 
