@@ -7,5 +7,5 @@ class DiscountSerializer(serializers.ModelSerializer):
     is_active = serializers.ReadOnlyField()
     class Meta:
         model = Discount
-        fields = ('code','discount','discount_type','is_active','valid_to','valid_from')
+        fields = ('id','code','discount','discount_type','is_active','valid_to','valid_from')
         # fields = "__all__"

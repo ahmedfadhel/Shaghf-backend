@@ -14,7 +14,12 @@ def check_code(self,code):
     valid_code = Discount.objects.filter(code=code)
     serializer = DiscountSerializer(valid_code,many=True)
     return Response(serializer.data,status=status.HTTP_200_OK)
-
+# List Discount codes
+@api_view(['GET'])
+def code_list(request):
+    coupons = Discount.objects.all()
+    serializer = DiscountSerializer(coupons,many=True)
+    return Response(serializer.data,status=status.HTTP_200_OK)
 # Create Discount Code
 @api_view(['POST'])
 def code_create(request):
@@ -67,5 +72,5 @@ def delete_code(request,id):
     except Discount.DoesNotExist:
         return Response({
                 'message':'العنصر غير موجود',
-                'status':404
+               
             },status=status.HTTP_404_NOT_FOUND)
